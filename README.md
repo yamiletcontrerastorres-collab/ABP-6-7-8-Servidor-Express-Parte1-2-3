@@ -1,12 +1,10 @@
-# ABP6 - Proyecto Node.js + Express
+# ABP6 - Servidor Node.js y Express
 
 ## Parte 1 - Módulo 6
 
-Este proyecto corresponde a la primera parte del Trabajo Práctico Integrador de Full Stack JavaScript.
+Este proyecto corresponde a la primera parte del Trabajo Práctico Integrador.
 
-El objetivo de esta etapa es desarrollar la estructura inicial del backend utilizando Node.js y Express, creando un servidor capaz de servir contenido web, gestionar diferentes rutas y registrar las solicitudes realizadas mediante persistencia básica en archivos planos.
-
-Esta estructura también permitirá continuar posteriormente con la integración de una base de datos y otras funcionalidades del proyecto.
+El objetivo es crear un servidor básico utilizando Node.js y Express, trabajar con rutas, middlewares y archivos planos, dejando una estructura organizada para continuar el proyecto en los siguientes módulos.
 
 ---
 
@@ -16,7 +14,7 @@ Esta estructura también permitirá continuar posteriormente con la integración
 - Express.js
 - Nodemon
 - Dotenv
-- Módulo `fs` de Node.js
+- Módulo fs
 - HTML
 - npm
 
@@ -24,44 +22,39 @@ Esta estructura también permitirá continuar posteriormente con la integración
 
 ## Instalación
 
-Primero se deben instalar las dependencias del proyecto:
+Para instalar las dependencias:
 
 ```bash
 npm install
+```
+
+Para utilizar las variables de entorno se debe crear un archivo `.env` en la raíz del proyecto con:
+
+```text
+PORT=3000
 ```
 
 ---
 
 ## Ejecución
 
-### Modo desarrollo
-
-```bash
-npm run dev
-```
-
-Este comando utiliza Nodemon para reiniciar automáticamente el servidor cuando se realizan cambios en el código.
-
-### Modo normal
+Para ejecutar el proyecto normalmente:
 
 ```bash
 npm start
 ```
 
-El servidor se ejecuta por defecto en:
+Para ejecutarlo en modo desarrollo con Nodemon:
+
+```bash
+npm run dev
+```
+
+El servidor funciona en:
 
 ```text
 http://localhost:3000
 ```
-
-El puerto se configura mediante una variable de entorno en el archivo `.env`.
-
----
-
-## Scripts disponibles
-
-- `npm start`: inicia el servidor utilizando Node.js.
-- `npm run dev`: inicia el servidor utilizando Nodemon.
 
 ---
 
@@ -85,7 +78,6 @@ NodeExpressApp/
 ├── routes/
 │   └── routes.js
 │
-├── .env
 ├── .gitignore
 ├── index.js
 ├── package.json
@@ -95,25 +87,19 @@ NodeExpressApp/
 
 ---
 
-## Rutas disponibles
+## Rutas
 
 ### GET /
 
-Ruta principal del servidor.
+Ruta principal de la aplicación.
 
 ```text
 http://localhost:3000/
 ```
 
-Permite acceder al contenido principal de la aplicación.
-
 ### GET /status
 
-```text
-http://localhost:3000/status
-```
-
-Permite comprobar que el servidor se encuentra funcionando correctamente.
+Permite comprobar que el servidor está funcionando.
 
 Ejemplo de respuesta:
 
@@ -126,54 +112,23 @@ Ejemplo de respuesta:
 
 ### GET /api
 
-```text
-http://localhost:3000/api
-```
-
-Devuelve información básica sobre el funcionamiento de la API.
-
-Ejemplo:
-
-```json
-{
-    "mensaje": "Bienvenido a mi API",
-    "estado": "funcionando"
-}
-```
+Devuelve un mensaje indicando el estado de la API.
 
 ### POST /api/usuarios
 
-Permite enviar información de un usuario mediante una petición POST.
-
-La información recibida se devuelve en formato JSON como comprobación del funcionamiento de la ruta.
-
----
-
-## Archivos estáticos
-
-La aplicación utiliza:
-
-```js
-express.static("public")
-```
-
-para servir archivos estáticos desde la carpeta `public`.
-
-En esta carpeta se encuentra el archivo `index.html`.
+Permite enviar datos de un usuario mediante una petición POST y recibirlos como respuesta en formato JSON.
 
 ---
 
 ## Registro de solicitudes
 
-Se implementó un middleware utilizando el módulo `fs` de Node.js.
+Se utiliza un middleware y el módulo `fs` para registrar las solicitudes realizadas al servidor.
 
-El middleware registra las solicitudes realizadas al servidor dentro de:
+Los registros se guardan en:
 
 ```text
 logs/log.txt
 ```
-
-Cada registro contiene la fecha, el método HTTP utilizado y la ruta solicitada.
 
 Ejemplo:
 
@@ -181,58 +136,42 @@ Ejemplo:
 2026-08-27T20:36:56.018Z - Método: GET - Ruta: /status
 ```
 
-Esto permite aplicar persistencia básica mediante archivos planos.
-
 ---
 
-## Variables de entorno
+## Organización del proyecto
 
-Se utiliza el paquete `dotenv` para cargar configuraciones desde el archivo `.env`.
+El proyecto se organizó en diferentes carpetas para separar las funciones:
 
-Actualmente se utiliza para definir el puerto del servidor:
-
-```text
-PORT=3000
-```
-
-El archivo `.env` se encuentra incluido en `.gitignore` para evitar publicar configuraciones privadas en el repositorio.
-
----
-
-## Organización del backend
-
-El proyecto fue dividido en diferentes carpetas para mantener una estructura clara y facilitar su crecimiento.
-
-- `routes`: contiene la definición de las rutas.
-- `controllers`: contiene la lógica asociada a las rutas.
-- `middlewares`: contiene funciones que se ejecutan durante el procesamiento de las solicitudes.
+- `routes`: contiene las rutas.
+- `controllers`: contiene la lógica de las rutas.
+- `middlewares`: contiene el registro de solicitudes.
 - `public`: contiene los archivos estáticos.
-- `logs`: almacena el registro de solicitudes.
+- `logs`: contiene el archivo de registro.
 
-Esta separación permite que el proyecto sea más fácil de mantener y prepara la aplicación para las siguientes etapas.
-
----
-
-## Justificación de decisiones técnicas
-
-Se utilizó `index.js` como archivo principal porque permite identificar fácilmente el punto de entrada de la aplicación.
-
-Express fue utilizado para crear el servidor y administrar las rutas de una forma sencilla y organizada.
-
-Se utilizó `express.static()` para servir contenido web desde la carpeta `public`.
-
-El registro de solicitudes fue implementado como middleware utilizando el módulo `fs`, permitiendo almacenar información en un archivo plano (`log.txt`).
-
-También se separó la ruta `/status` de su lógica mediante las carpetas `routes` y `controllers`. Esto permite mantener responsabilidades separadas y facilita agregar nuevas funcionalidades en el futuro.
-
-Se utilizó `dotenv` para separar configuraciones del código principal y se creó `.gitignore` para evitar subir `node_modules` y `.env` al repositorio.
+También se utiliza `express.static()` para servir los archivos de la carpeta `public`.
 
 ---
 
-## Reflexión técnica
+## Decisiones tomadas
 
-Durante el desarrollo de esta primera parte pude comprender mejor cómo se estructura un servidor utilizando Node.js y Express.
+Se utilizó `index.js` como archivo principal del servidor.
 
-Uno de los aspectos más importantes fue entender cómo se relacionan las rutas, los controladores y los middlewares. Al principio puede resultar confuso separar estas funciones en diferentes archivos, pero esta organización permite que el proyecto sea más claro y fácil de ampliar.
+Se separaron las rutas, controladores y middlewares para mantener el código más ordenado y facilitar la incorporación de nuevas funciones.
 
-Esta primera estructura deja preparado el backend para continuar agregando funcionalidades en las siguientes etapas del proyecto, como la conexión con una base de datos y nuevas rutas de la aplicación.
+También se utilizó `dotenv` para manejar el puerto mediante variables de entorno y `.gitignore` para evitar subir `node_modules` y `.env` al repositorio.
+
+---
+
+## Reflexión
+
+Durante esta primera parte aprendí a crear un servidor con Node.js y Express y a organizar mejor los archivos del proyecto.
+
+También pude entender de mejor manera cómo funcionan las rutas, los controladores y los middlewares, además de utilizar `fs` para guardar registros en un archivo de texto.
+
+Todavía estoy aprendiendo a trabajar con este tipo de estructura, pero esta primera parte me permitió entender mejor cómo se organiza un backend.
+
+---
+
+## Estado del proyecto
+
+La Parte 1 se encuentra funcionando correctamente y queda preparada para continuar con la integración de una base de datos y nuevas funcionalidades en los siguientes módulos.
