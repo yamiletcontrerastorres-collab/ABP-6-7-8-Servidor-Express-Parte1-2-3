@@ -1,0 +1,10 @@
+2026-08-27T20:36:56.018Z - Método: GET - Ruta: /status
+2026-08-27T20:36:56.292Z - Método: GET - Ruta: /favicon.ico
+2026-08-27T20:42:45.662Z - Método: GET - Ruta: /status
+2026-08-27T20:50:22.473Z - Método: GET - Ruta: /status
+2026-08-27T21:34:12.521Z - Método: GET - Ruta: /
+2026-08-27T21:34:22.345Z - Método: GET - Ruta: /status
+2026-08-27T21:34:45.891Z - Método: GET - Ruta: /api
+2026-08-27T21:37:46.643Z - Método: GET - Ruta: /status
+2026-08-27T21:41:30.174Z - Método: POST - Ruta: /api/usuarios
+2026-08-27T21:42:53.985Z - Método: POST - Ruta: /api/usuarios
