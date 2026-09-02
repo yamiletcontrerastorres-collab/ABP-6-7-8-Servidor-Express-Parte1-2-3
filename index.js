@@ -1,4 +1,8 @@
 require("dotenv").config();
+require("./db");
+require("./models/sequelize");
+require("./models/relaciones");
+
 
 const express = require("express");
 const registrarVisita = require("./middlewares/logger");
