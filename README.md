@@ -1,10 +1,12 @@
-# ABP6 - Servidor Node.js y Express
+# ABP 6-7-8 - Servidor Node.js y Express
 
 Este proyecto corresponde al Trabajo Práctico Integrador desarrollado progresivamente durante los módulos de Backend.
 
 En la **Parte 1 - Módulo 6** se creó la estructura inicial del servidor utilizando Node.js y Express.
 
 En la **Parte 2 - Módulo 7** se incorporó una base de datos PostgreSQL, operaciones CRUD, transacciones, Sequelize y relaciones entre modelos.
+
+En la **Parte 3 - Módulo 8** se incorporó autenticación con JWT, protección de rutas, subida de archivos con Multer y nuevas funcionalidades para completar la API REST.
 
 ---
 
@@ -92,7 +94,9 @@ NodeExpressApp/
 │   └── log.txt
 │
 ├── middlewares/
-│   └── logger.js
+│   ├── logger.js
+│   ├── auth.js
+│   └── upload.js
 │
 ├── models/
 │   ├── sequelize.js
@@ -105,6 +109,8 @@ NodeExpressApp/
 │
 ├── routes/
 │   └── routes.js
+│
+├── uploads/
 │
 ├── .env
 ├── .gitignore
@@ -701,7 +707,7 @@ Todavía necesito seguir practicando estos conceptos y me queda un larguisimo ca
 
 ## Estado del proyecto
 
-La Parte 1 y la Parte 2 se encuentran funcionando correctamente.
+La Parte 1, Parte 2 y Parte 3 se encuentran funcionando correctamente.
 
 Actualmente el proyecto cuenta con:
 
@@ -717,5 +723,124 @@ Actualmente el proyecto cuenta con:
 - Modelos de Usuario e Historial.
 - Relación uno a muchos entre Usuario e Historial.
 - Consultas de relaciones mediante Sequelize.
+- Autenticación mediante JWT.
+- Rutas protegidas mediante middleware.
+- Subida y validación de archivos con Multer.
+- CRUD de historial_usuarios.
+- Búsqueda filtrada de usuarios por nombre.
 
-El proyecto queda preparado para continuar incorporando las funcionalidades correspondientes a la siguiente etapa.
+
+## Parte 3 - Módulo 8
+
+En esta etapa se incorporó autenticación mediante JWT, protección de rutas, subida de archivos con Multer y nuevas operaciones CRUD para una segunda entidad.
+
+### Autenticación con JWT
+
+Se creó el endpoint:
+
+POST /login
+
+Este endpoint permite iniciar sesión utilizando correo y contraseña. Si las credenciales son correctas, el servidor genera un token JWT con una duración de 1 hora.
+
+El token debe enviarse en las rutas protegidas utilizando:
+
+Authorization: Bearer TOKEN
+
+Rutas protegidas:
+
+GET /usuarios
+GET /usuarios-historial
+
+Si no se envía el token, el servidor responde con error 401.
+
+### Subida de archivos
+
+Se implementó:
+
+POST /upload
+
+La subida de archivos se realiza utilizando Multer.
+
+Configuración utilizada:
+
+- Archivos permitidos: JPG, JPEG y PNG
+- Tamaño máximo: 2 MB
+- Carpeta de almacenamiento: uploads/
+
+Los archivos subidos pueden visualizarse mediante:
+
+/uploads/nombre-del-archivo
+
+También se agregó validación para rechazar tipos de archivo no permitidos.
+
+### CRUD de historial
+
+Se agregó un CRUD para la entidad historial_usuarios.
+
+Endpoints:
+
+GET /historial
+POST /historial
+PUT /historial/:id
+DELETE /historial/:id
+
+Esto permite obtener, crear, actualizar y eliminar registros del historial.
+
+### Búsqueda filtrada
+
+El endpoint de usuarios permite realizar búsquedas por nombre utilizando parámetros en la URL.
+
+Ejemplo:
+
+GET /usuarios?nombre=Valentina
+
+La búsqueda utiliza ILIKE para permitir coincidencias sin importar mayúsculas o minúsculas.
+
+### Endpoints principales
+
+GET /status
+GET /usuarios
+POST /usuarios
+PUT /usuarios/:id
+DELETE /usuarios/:id
+POST /usuarios/transaccion
+GET /usuarios-orm
+GET /usuarios-historial
+POST /login
+GET /historial
+POST /historial
+PUT /historial/:id
+DELETE /historial/:id
+POST /upload
+
+### Tecnologías utilizadas en esta etapa
+
+- Node.js
+- Express.js
+- PostgreSQL
+- Sequelize
+- JSON Web Token
+- Multer
+- Postman
+
+### Seguridad
+
+Se utilizó JWT para controlar el acceso a rutas protegidas.
+
+Las variables sensibles, como la clave JWT y los datos de conexión a PostgreSQL, se almacenan en el archivo .env y este archivo no se incluye en GitHub.
+
+El token JWT no se almacena en el servidor. El cliente debe enviarlo en cada solicitud protegida mediante el encabezado Authorization.
+
+### Reflexión técnica - Parte 3
+
+En esta parte del proyecto aprendí a agregar autenticación a una API utilizando JWT. 
+
+También aprendí a subir archivos utilizando Multer y a validar el tipo de archivo que se permite subir. Uno de los problemas que tuve fue el manejo de errores cuando se intentaba subir un archivo no permitido, pero despues de unas batallas, pude solucionarlo para que la API mostrara una respuesta más clara.
+
+Además, se completó un segundo CRUD utilizando la tabla historial_usuarios y se agregó una búsqueda filtrada de usuarios por nombre.
+
+Esta etapa me permitió comprender mejor cómo se pueden combinar rutas, controladores, middleware, bases de datos, autenticación y subida de archivos dentro de una misma aplicación.
+
+**Nombre:** Yamilet Contreras  
+**Proyecto:** ABP N°6-7-8-Servidor Node.js y Express  
+**Módulo:** 8 - Parte 3

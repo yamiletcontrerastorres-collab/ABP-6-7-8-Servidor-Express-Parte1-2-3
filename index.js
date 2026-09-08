@@ -19,6 +19,7 @@ app.use(registrarVisita);
 
 // Archivos estáticos
 app.use(express.static("public"));
+app.use("/uploads", express.static("uploads"));
 
 // Ruta principal
 app.get("/", (req, res) => {
