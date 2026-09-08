@@ -1,16 +1,25 @@
+// Importa la conexión con PostgreSQL
 const pool = require("../db");
+
+// Importa JWT para generar tokens de autenticación
 const jwt = require("jsonwebtoken");
+
+// Importa los modelos y sus relaciones de Sequelize
 const {
     Usuario,
     Historial
 } = require("../models/relaciones");
 
 
-// Obtener todos los usuarios
+// -------------------- USUARIOS --------------------
+
+// Obtener todos los usuarios o filtrarlos por nombre
 const obtenerUsuarios = async (req, res) => {
     try {
+        // Obtiene el nombre enviado como parámetro en la URL
         const { nombre } = req.query;
 
+        // Consulta base para obtener los usuarios
         let consulta = `
             SELECT id, nombre, correo, fecha_creacion
             FROM usuarios
@@ -18,11 +27,13 @@ const obtenerUsuarios = async (req, res) => {
 
         let valores = [];
 
+        // Si se envía un nombre, se agrega un filtro a la consulta
         if (nombre) {
             consulta += " WHERE nombre ILIKE $1";
             valores.push(`%${nombre}%`);
         }
 
+        // Ordena los resultados por ID
         consulta += " ORDER BY id";
 
         const resultado = await pool.query(consulta, valores);
@@ -42,6 +53,8 @@ const obtenerUsuarios = async (req, res) => {
         });
     }
 };
+
+
 // Crear un nuevo usuario
 const crearUsuario = async (req, res) => {
     try {
@@ -55,6 +68,7 @@ const crearUsuario = async (req, res) => {
             });
         }
 
+        // Inserta el nuevo usuario en PostgreSQL
         const resultado = await pool.query(
             `INSERT INTO usuarios (nombre, correo, contrasena)
              VALUES ($1, $2, $3)
@@ -78,11 +92,14 @@ const crearUsuario = async (req, res) => {
     }
 };
 
+
+// Actualizar un usuario mediante su ID
 const actualizarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
         const { nombre, correo } = req.body;
 
+        // Actualiza el nombre y correo del usuario
         const resultado = await pool.query(
             `UPDATE usuarios
              SET nombre = $1, correo = $2
@@ -91,6 +108,7 @@ const actualizarUsuario = async (req, res) => {
             [nombre, correo, id]
         );
 
+        // Comprueba si el usuario existe
         if (resultado.rows.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -114,15 +132,19 @@ const actualizarUsuario = async (req, res) => {
     }
 };
 
+
+// Eliminar un usuario mediante su ID
 const eliminarUsuario = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Elimina el usuario de PostgreSQL
         const resultado = await pool.query(
             "DELETE FROM usuarios WHERE id = $1 RETURNING id, nombre, correo",
             [id]
         );
 
+        // Comprueba si el usuario existe
         if (resultado.rows.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -146,13 +168,19 @@ const eliminarUsuario = async (req, res) => {
     }
 };
 
+
+// -------------------- TRANSACCIONES --------------------
+
 // Crear usuario usando una transacción
 const crearUsuarioConTransaccion = async (req, res) => {
+
+    // Obtiene una conexión individual del pool
     const client = await pool.connect();
 
     try {
         const { nombre, correo, contrasena, forzarError } = req.body;
 
+        // Comprueba que los campos obligatorios tengan datos
         if (!nombre || !correo || !contrasena) {
             return res.status(400).json({
                 status: "error",
@@ -160,8 +188,10 @@ const crearUsuarioConTransaccion = async (req, res) => {
             });
         }
 
+        // Inicia la transacción
         await client.query("BEGIN");
 
+        // Primero crea el usuario
         const usuario = await client.query(
             `INSERT INTO usuarios (nombre, correo, contrasena)
              VALUES ($1, $2, $3)
@@ -169,16 +199,19 @@ const crearUsuarioConTransaccion = async (req, res) => {
             [nombre, correo, contrasena]
         );
 
+        // Permite provocar un error para comprobar el ROLLBACK
         const accion = forzarError
             ? null
             : "Usuario creado mediante transacción";
 
+        // Registra la creación del usuario en el historial
         await client.query(
             `INSERT INTO historial_usuarios (usuario_id, accion)
              VALUES ($1, $2)`,
             [usuario.rows[0].id, accion]
         );
 
+        // Si las dos operaciones funcionan, confirma los cambios
         await client.query("COMMIT");
 
         console.log("Transacción completada correctamente");
@@ -190,6 +223,8 @@ const crearUsuarioConTransaccion = async (req, res) => {
         });
 
     } catch (error) {
+
+        // Si ocurre un error, revierte todos los cambios
         await client.query("ROLLBACK");
 
         console.error("Transacción revertida:", error.message);
@@ -200,13 +235,20 @@ const crearUsuarioConTransaccion = async (req, res) => {
         });
 
     } finally {
+
+        // Libera la conexión para que pueda volver a utilizarse
         client.release();
     }
 };
 
+
+// -------------------- SEQUELIZE --------------------
+
 // Obtener usuarios utilizando Sequelize
 const obtenerUsuariosORM = async (req, res) => {
     try {
+
+        // findAll obtiene todos los usuarios utilizando el modelo
         const usuarios = await Usuario.findAll({
             attributes: ["id", "nombre", "correo", "fecha_creacion"]
         });
@@ -227,9 +269,12 @@ const obtenerUsuariosORM = async (req, res) => {
     }
 };
 
+
 // Obtener usuarios junto con su historial usando Sequelize
 const obtenerUsuariosConHistorial = async (req, res) => {
     try {
+
+        // include permite obtener el historial relacionado con cada usuario
         const usuarios = await Usuario.findAll({
             attributes: ["id", "nombre", "correo", "fecha_creacion"],
             include: {
@@ -255,11 +300,15 @@ const obtenerUsuariosConHistorial = async (req, res) => {
     }
 };
 
+
+// -------------------- AUTENTICACIÓN JWT --------------------
+
 // Iniciar sesión y generar token JWT
 const loginUsuario = async (req, res) => {
     try {
         const { correo, contrasena } = req.body;
 
+        // Comprueba que se hayan enviado las credenciales
         if (!correo || !contrasena) {
             return res.status(400).json({
                 status: "error",
@@ -267,6 +316,7 @@ const loginUsuario = async (req, res) => {
             });
         }
 
+        // Busca un usuario que coincida con las credenciales recibidas
         const resultado = await pool.query(
             `SELECT id, nombre, correo
              FROM usuarios
@@ -274,6 +324,7 @@ const loginUsuario = async (req, res) => {
             [correo, contrasena]
         );
 
+        // Si no encuentra al usuario, rechaza el inicio de sesión
         if (resultado.rows.length === 0) {
             return res.status(401).json({
                 status: "error",
@@ -283,6 +334,7 @@ const loginUsuario = async (req, res) => {
 
         const usuario = resultado.rows[0];
 
+        // Genera un token JWT válido durante una hora
         const token = jwt.sign(
             {
                 id: usuario.id,
@@ -294,6 +346,7 @@ const loginUsuario = async (req, res) => {
             }
         );
 
+        // Devuelve el usuario y el token generado
         res.json({
             status: "success",
             message: "Inicio de sesión correcto",
@@ -312,6 +365,9 @@ const loginUsuario = async (req, res) => {
         });
     }
 };
+
+
+// -------------------- HISTORIAL --------------------
 
 // Obtener todo el historial
 const obtenerHistorial = async (req, res) => {
@@ -335,11 +391,13 @@ const obtenerHistorial = async (req, res) => {
     }
 };
 
+
 // Crear un registro en el historial
 const crearHistorial = async (req, res) => {
     try {
         const { usuario_id, accion } = req.body;
 
+        // Comprueba que los campos necesarios hayan sido enviados
         if (!usuario_id || !accion) {
             return res.status(400).json({
                 status: "error",
@@ -347,6 +405,7 @@ const crearHistorial = async (req, res) => {
             });
         }
 
+        // Inserta un nuevo registro en historial_usuarios
         const resultado = await pool.query(
             `INSERT INTO historial_usuarios (usuario_id, accion)
              VALUES ($1, $2)
@@ -370,12 +429,14 @@ const crearHistorial = async (req, res) => {
     }
 };
 
+
 // Actualizar un registro del historial
 const actualizarHistorial = async (req, res) => {
     try {
         const { id } = req.params;
         const { accion } = req.body;
 
+        // Comprueba que se haya enviado una acción
         if (!accion) {
             return res.status(400).json({
                 status: "error",
@@ -383,6 +444,7 @@ const actualizarHistorial = async (req, res) => {
             });
         }
 
+        // Actualiza el registro mediante su ID
         const resultado = await pool.query(
             `UPDATE historial_usuarios
              SET accion = $1
@@ -391,6 +453,7 @@ const actualizarHistorial = async (req, res) => {
             [accion, id]
         );
 
+        // Comprueba si el registro existe
         if (resultado.rows.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -420,6 +483,7 @@ const eliminarHistorial = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Elimina el registro mediante su ID
         const resultado = await pool.query(
             `DELETE FROM historial_usuarios
              WHERE id = $1
@@ -427,6 +491,7 @@ const eliminarHistorial = async (req, res) => {
             [id]
         );
 
+        // Comprueba si el registro existe
         if (resultado.rows.length === 0) {
             return res.status(404).json({
                 status: "error",
@@ -450,6 +515,10 @@ const eliminarHistorial = async (req, res) => {
     }
 };
 
+
+// -------------------- EXPORTACIONES --------------------
+
+// Exporta los controladores para utilizarlos en routes.js
 module.exports = {
     obtenerUsuarios,
     crearUsuario,

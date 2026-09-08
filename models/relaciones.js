@@ -1,5 +1,9 @@
+// Importa los modelos
 const Usuario = require("./Usuario");
 const Historial = require("./Historial");
+
+
+// -------------------- RELACIONES --------------------
 
 // Un usuario puede tener muchos registros de historial
 Usuario.hasMany(Historial, {
@@ -7,12 +11,14 @@ Usuario.hasMany(Historial, {
     as: "historial"
 });
 
-// Cada registro de historial pertenece a un usuario
+// Cada registro del historial pertenece a un usuario
 Historial.belongsTo(Usuario, {
     foreignKey: "usuario_id",
     as: "usuario"
 });
 
+
+// Exporta los modelos con sus relaciones
 module.exports = {
     Usuario,
     Historial
