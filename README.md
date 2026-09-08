@@ -831,6 +831,8 @@ Las variables sensibles, como la clave JWT y los datos de conexión a PostgreSQL
 
 El token JWT no se almacena en el servidor. El cliente debe enviarlo en cada solicitud protegida mediante el encabezado Authorization.
 
+Se protegieron las rutas `/usuarios` y `/usuarios-historial` porque permiten acceder a información de los usuarios y su historial, por lo que se requiere autenticación mediante un token JWT válido.
+
 ### Reflexión técnica - Parte 3
 
 En esta parte del proyecto aprendí a agregar autenticación a una API utilizando JWT. 
